@@ -1,0 +1,18 @@
+[package]
+name = "codeforces"
+description = "Solutions to challenges"
+keywords = ["coding", "contests", "practice"]
+version.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+publish = false
+readme = "../README.md"
+license-file.workspace = true
+repository = "https://github.com/solweo/rust-grind"
+authors = ["Adrian Alekseev", "solweo"]
+
+[dependencies]
+itertools.workspace = true
+
+[features]
+default = []
