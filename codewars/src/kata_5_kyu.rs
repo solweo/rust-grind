@@ -1,15 +1,31 @@
 /// -*- coding:utf-8 -*-
-/// title       : Build Tower Advanced
-/// kata UUID   : 57675f3dedc6f728ee000256
-/// tags        : ['Strings', 'ASCII Art', 'Fundamentals']
+/// title       : ■□ Pattern □■ : Zoom
+/// kata UUID   : 56e6705b715e72fef0000647
+/// tags        : ['ASCII Art', 'Puzzles']
 /// ---------------------------------------------------
 /// description : solutions for codewars.com
 /// author      : solweo
 /// -----------------------------------------------------
 #[allow(dead_code)]
-mod build_tower_advanced {
-    fn zoom(_n: i32) -> String {
-        todo!()
+mod pattern_zoom {
+    use itertools::Itertools;
+    use std::cmp::max;
+
+    fn zoom(n: i32) -> String {
+        const EMPTY: char = '□';
+        const FILLED: char = '■';
+
+        let rule = |x: i32, y: i32| max(
+            x.abs_diff(n/2), 
+            y.abs_diff(n/2)) % 2 == 0;
+        
+        (0..n).map(|row| (0..n).map(|column| 
+            match rule(row, column) {
+                true => FILLED,
+                false => EMPTY,
+            })
+            .join(""))
+            .join("\n")
     }
 
     #[test]
