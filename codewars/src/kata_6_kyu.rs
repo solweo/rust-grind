@@ -541,3 +541,79 @@ A   A BBBB
         assert_eq!(result.trim(), expected_output.trim(), "The block print output for 'ab' did not match the expected result.");
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : LET ME IN!
+/// kata UUID   : 6498aa0daff4420024ce2c88
+/// tags        : ['Fundamentals', 'Performance']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod let_me_in {
+    use itertools::Itertools;
+
+    fn get_in_line(queue: &[i32]) -> i32{
+        let mut queue = {
+            let (prioritized, rest) = queue
+                .iter()
+                .partition::<Vec<i32>, _>(|&&x| x == 1 || x == 2);
+            prioritized.into_iter()
+                .sorted()
+                .chain(rest)
+                .collect::<Vec<_>>()
+        };
+
+        let mut minutes = 0;
+        let mut index = 0;
+
+        while queue.contains(&0) {
+            match queue[index] {
+                0 => {
+                    minutes += 1;
+                    break;
+                },
+                1 => {
+                    queue.remove(0);
+                    minutes += 1;
+                    let mut i = 0;
+                    let len = queue.len(); // Store the length before the loop
+                    while i < len / 2 {
+                        if queue[i] == 3 || queue[len - i - 1] == 3 || queue[i] == 1 {
+                            // pass
+                        } else {
+                            queue.swap(index, len - index - 1);
+                        }
+                        i += 1;
+                        index += 1;
+                    }
+                    index = 0;
+                }
+                _ => {
+                    minutes += 1;
+                    queue.remove(0);
+                }
+            }
+        }
+
+        minutes
+    }
+
+    #[test]
+    fn examples() {
+        assert_eq!(get_in_line(&[1,1,3,2,0]), 3);
+        assert_eq!(get_in_line(&[0, 8, 2, 1, 4, 2, 12, 3, 2]), 6);
+    }
+    
+    #[test]
+    fn more_tests(){
+        assert_eq!(get_in_line(&[0, 8, 2, 1, 4, 2, 12, 3, 2]), 6);
+        assert_eq!(get_in_line(&[2, 3, 1, 4, 5, 2, 1, 0, 8, 5, 6, 1]), 10);
+        assert_eq!(get_in_line(&[12, 3, 19, 14, 1, 19, 16, 4, 0, 1]), 3);
+        assert_eq!(get_in_line(&[13, 20, 3, 3, 14, 5, 13, 0, 8, 5]), 8);
+        assert_eq!(get_in_line(&[16, 4, 3, 0, 1, 3, 7, 3, 10, 1]), 6);
+        assert_eq!(get_in_line(&[1, 1, 1, 3, 3, 8, 3, 14, 3, 0]), 10);
+        assert_eq!(get_in_line(&[0]), 1);
+    }
+}
