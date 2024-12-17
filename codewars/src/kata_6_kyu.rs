@@ -642,3 +642,35 @@ mod round_by_05_steps {
         assert_eq!(solution(4.8), 5.0);
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : Transform To Prime
+/// kata UUID   : 5a946d9fba1bb5135100007c
+/// tags        : ['Fundamentals', 'Arrays']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod transform_to_prime {
+    fn minimum_number(xs: &[u32]) -> u32 {
+        let sum: u32 = xs.iter().sum();
+
+        (0..).find(|&x| {
+            match sum + x {
+                x if x <= 1 => false,
+                x if (2..=(x as f64).sqrt() as u32).any(|y| x % y == 0) => false,
+                _ => true
+            }
+        }).unwrap_or(0)
+    }
+
+    #[test]
+    fn basic() {
+        assert_eq!(minimum_number(&[3,1,2]), 1);
+        assert_eq!(minimum_number(&[5,2]), 0);
+        assert_eq!(minimum_number(&[1,1,1]), 0);
+        assert_eq!(minimum_number(&[2,12,8,4,6]), 5);
+        assert_eq!(minimum_number(&[50,39,49,6,17,28]), 2);
+    }
+}
