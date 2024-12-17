@@ -617,3 +617,28 @@ mod let_me_in {
         assert_eq!(get_in_line(&[0]), 1);
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : Round by 0.5 steps
+/// kata UUID   : 51f1342c76b586046800002a
+/// tags        : ['Fundamentals', 'Mathematics']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod round_by_05_steps {
+    use std::ops::{Div, Mul};
+
+    fn solution(n: f64) -> f64 {
+        n.mul(2.).round().div(2.)
+    }
+
+    #[test]
+    fn sample_tests() {
+        assert_eq!(solution(4.2), 4.0);
+        assert_eq!(solution(4.4), 4.5);
+        assert_eq!(solution(4.6), 4.5);
+        assert_eq!(solution(4.8), 5.0);
+    }
+}
