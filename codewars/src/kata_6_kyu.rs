@@ -674,3 +674,60 @@ mod transform_to_prime {
         assert_eq!(minimum_number(&[50,39,49,6,17,28]), 2);
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : Most Frequent Weekdays
+/// kata UUID   : 56eb16655250549e4b0013f4
+/// tags        : ['Fundamentals']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod most_frequent_weekdays {
+    use chrono::*;
+
+    const DAYS_OF_WEEK: [&str; 7] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    fn most_frequent_days(year: i32) -> Vec<String> {
+        // A common year has 365 days, and a leap year has 366 days.
+        // Since there are 7 days in a week, dividing 365 or 366 by 7 results in a remainder of 1 or another extra day.
+        let first_day = NaiveDate::from_ymd_opt(year, 1, 1).unwrap().weekday().num_days_from_monday();
+        let last_day = NaiveDate::from_ymd_opt(year, 12, 31).unwrap().weekday().num_days_from_monday();
+
+        // If the first and last days of the year are the same, the year starts and ends on the same day.
+        // This happens in common years (365 days): one day will appear 53 times, while the others 52 times.
+        // For leap years: two consecutive days will appear 53 times, while the others 52 times.
+        let mut result = vec![
+            DAYS_OF_WEEK[first_day as usize].to_string(),
+            DAYS_OF_WEEK[last_day as usize].to_string(),
+        ];
+        result.dedup();
+        result.sort_by(|a, b| DAYS_OF_WEEK.iter()
+            .position(|&d| d == a)
+            .cmp(&DAYS_OF_WEEK.iter().position(|&d| d == b)));
+        
+        result
+    }
+
+    #[test]
+    fn basic() {
+        assert_eq!(most_frequent_days(1770), ["Monday"]);
+        assert_eq!(most_frequent_days(1785), ["Saturday"]);
+        assert_eq!(most_frequent_days(1794), ["Wednesday"]);
+        assert_eq!(most_frequent_days(1901), ["Tuesday"]);
+        assert_eq!(most_frequent_days(1910), ["Saturday"]);
+        assert_eq!(most_frequent_days(1968), ["Monday", "Tuesday"]);
+        assert_eq!(most_frequent_days(1984), ["Monday", "Sunday"]);
+        assert_eq!(most_frequent_days(1986), ["Wednesday"]);
+        assert_eq!(most_frequent_days(2001), ["Monday"]);
+        assert_eq!(most_frequent_days(2016), ["Friday", "Saturday"]);
+        assert_eq!(most_frequent_days(2135), ["Saturday"]);
+        assert_eq!(most_frequent_days(3043), ["Sunday"]);
+        assert_eq!(most_frequent_days(3150), ["Sunday"]);
+        assert_eq!(most_frequent_days(3230), ["Tuesday"]);
+        assert_eq!(most_frequent_days(3361), ["Thursday"]);
+        assert_eq!(most_frequent_days(2000), ["Saturday", "Sunday"]);
+        assert_eq!(most_frequent_days(1984), ["Monday", "Sunday"]);
+    }
+}
