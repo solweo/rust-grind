@@ -215,3 +215,169 @@ mod find_the_smallest {
         testing(837687834358978897, (376878343588978897, 0, 10));
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : Molecule to atoms
+/// kata UUID   : 52f831fa9d332c6591000511
+/// tags        : ['Parsing', 'Algorithms', 'Strings']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod molecule_to_atoms {
+    use std::collections::HashMap;
+    use itertools::Itertools;
+    use thiserror::Error;
+
+    pub type Atom = (String, usize);
+    pub type Molecule = Vec<Atom>;
+
+    #[derive(Error, Debug)]
+    pub enum ParseError { 
+        #[error("Not a valid molecule")]
+        Invalid,
+        #[error("Mismatched parenthesis")]
+        Mismatch,
+    }
+
+    pub fn parse_molecule(s: &str) -> Result<Molecule, ParseError> {
+        let mut chars = s.chars().peekable();
+        let mut bracket_stack = Vec::new();
+
+        let group_counts = recurs_molecule(&mut chars, 1, &mut bracket_stack)?;
+        if !bracket_stack.is_empty() {
+            return Err(ParseError::Mismatch);
+        }
+        
+        let molecule = group_counts
+            .into_iter()
+            .sorted_by(|a, b| a.0.cmp(&b.0))
+            .collect::<Molecule>();
+        
+        Ok(molecule)
+    }
+    
+    fn recurs_molecule<I>(
+        chars: &mut std::iter::Peekable<I>,
+        multiplier: usize,
+        bracket_stack: &mut Vec<char>, 
+    ) -> Result<HashMap<String, usize>, ParseError>
+    where
+        I: Iterator<Item = char>,
+    {
+        let mut counts = HashMap::new();
+
+        let is_matching_bracket = |open, close| matches!((open, close), ('(', ')') | ('[', ']') | ('{', '}'));
+    
+        while let Some(&c) = chars.peek() {
+            match c {
+                c if c.is_uppercase() => {
+                    let (element, count) = parse_element(chars)?;
+                    *counts.entry(element).or_insert(0) += count * multiplier;
+                }
+                '(' | '[' | '{' => {
+                    chars.next(); // Consume opening bracket
+                    bracket_stack.push(c);
+                    
+                    let inner_atoms = recurs_molecule(chars, 1, bracket_stack)?;
+                    let inner_multiplier = parse_multiplier(chars)?;
+                    
+                    for (element, count) in inner_atoms {
+                        *counts.entry(element).or_insert(0) += count * inner_multiplier * multiplier;
+                    }
+                }
+                ')' | ']' | '}' => {
+                    chars.next(); // Consume closing bracket
+                    if bracket_stack.pop().map_or(false, |open| !is_matching_bracket(open, c)) {
+                        return Err(ParseError::Mismatch);
+                    }
+                    break;
+                }
+                _ => return Err(ParseError::Invalid),
+            }
+        }
+    
+        Ok(counts)
+    }
+    
+    fn parse_element<I>(
+        chars: &mut std::iter::Peekable<I>,
+    ) -> Result<Atom, ParseError>
+    where
+        I: Iterator<Item = char>,
+    {
+        let mut element = String::new();
+        element.push(chars.next().ok_or(ParseError::Invalid)?);
+    
+        if let Some(&c) = chars.peek() {
+            if c.is_lowercase() {
+                element.push(chars.next().unwrap());
+            }
+        }
+    
+        let count = parse_multiplier(chars)?;
+
+        Ok((element, count))
+    }
+    
+    fn parse_multiplier<I>(
+        chars: &mut std::iter::Peekable<I>,
+    ) -> Result<usize, ParseError>
+    where
+        I: Iterator<Item = char>,
+    {
+        let mut multiplier = 0;
+    
+        while let Some(&c) = chars.peek() {
+            if c.is_ascii_digit() {
+                multiplier = multiplier * 10 + chars.next().unwrap().to_digit(10).unwrap() as usize;
+            } else {
+                break;
+            }
+        }
+    
+        Ok(if multiplier == 0 { 1 } else { multiplier })
+    }
+
+    macro_rules! assert_parse {
+        ($formula:expr, $expected:expr, $name:ident) => {
+            #[test]
+            fn $name() {
+                super::assert_parse($formula, &$expected, "");
+            }
+        }
+    }
+
+    mod molecules {
+        assert_parse!("H", [("H",1)], hydrogen);
+        assert_parse!("O2", [("O",2)], oxygen);
+        assert_parse!("H2O", [("H",2),("O",1)], water);
+        assert_parse!("Mg(OH)2", [("Mg",1),("O",2),("H",2)], magnesium_hydroxide);
+        assert_parse!("K4[ON(SO3)2]2", [("K",4),("O",14),("N",2),("S",4)], fremys_salt);
+    }
+
+    #[test]
+    fn errors() {
+        assert_fail("pie", "Not a valid molecule");
+        assert_fail("Mg(OH", "Mismatched parenthesis");
+        assert_fail("Mg(OH}2", "Mismatched parenthesis");
+    }
+
+    fn assert_fail(formula: &str, msg: &str) {
+        let result = parse_molecule(formula);
+        assert!(result.is_err(), "expected {} {:?} to fail, got {:?}", msg, formula, result.unwrap());
+    }
+
+    fn assert_parse(formula: &str, expected: &[(&str, usize)], _mst: &str) {
+        let mut expected = expected.into_iter()
+        .map(|&(name, usize)| (name.to_owned(), usize))
+        .collect::<Molecule>();
+        let result = parse_molecule(formula);
+        assert!(result.is_ok(), "expected {:?} to pass, got {:?}", formula, result);
+        let mut actual = result.unwrap();
+        actual.sort();
+        expected.sort();
+        assert_eq!(actual, expected);
+    }
+}

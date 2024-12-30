@@ -13,6 +13,7 @@ authors = ["Adrian Alekseev", "solweo"]
 
 [dependencies]
 itertools.workspace = true
+thiserror.workspace = true
 
 [features]
 default = []
