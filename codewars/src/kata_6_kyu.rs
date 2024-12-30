@@ -731,3 +731,52 @@ mod most_frequent_weekdays {
         assert_eq!(most_frequent_days(1984), ["Monday", "Sunday"]);
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : Leaderboard climbers
+/// kata UUID   : 5f6d120d40b1c900327b7e22
+/// tags        : ['Lists', 'Fundamentals']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod leaderboard_climbers {
+    use itertools::Itertools;
+
+    fn leaderboard_sort(leaderboard: &[String], changes: &[String]) -> Vec<String> {
+        let mut leaderboard = leaderboard.to_vec();
+        let changes = changes.iter().map(|row| {
+            let (name, change) = row.split_ascii_whitespace().collect_tuple().unwrap();
+            let change = change.parse::<i32>().unwrap();
+            (name, change)
+        }).collect::<Vec<_>>();
+
+        for (name, change) in changes {
+            let idx = leaderboard.iter().position(|who| who == name).unwrap();
+            leaderboard.remove(idx);
+            // Indexing is inverted in the leaderboard sense, so we subtract rather than add the move
+            leaderboard.insert((idx as i32 - change) as usize, name.to_string());
+        }
+
+        leaderboard
+    }
+
+    #[test]
+    fn basic() {
+        assert_eq!(
+            leaderboard_sort(
+                &["John".into(), "Brian".into(), "Jim".into(), "Dave".into(), "Fred".into()],
+                &["Dave +1".into(), "Fred +4".into(), "Brian -1".into()],
+            ),
+            &["Fred", "John", "Dave", "Brian", "Jim"],
+        );
+        assert_eq!(
+            leaderboard_sort(
+                &["Bob".into(), "Larry".into(), "Kevin".into(), "Jack".into(), "Max".into()],
+                &["Max +3".into(), "Kevin -1".into(), "Kevin +3".into()],
+            ),
+            &["Bob", "Kevin", "Max", "Larry", "Jack"],
+        );
+    }
+}
