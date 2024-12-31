@@ -780,3 +780,57 @@ mod leaderboard_climbers {
         );
     }
 }
+
+/// -*- coding:utf-8 -*-
+/// title       : Death by Coffee
+/// kata UUID   : 57db78d3b43dfab59c001abe
+/// tags        : ['Puzzles']
+/// ---------------------------------------------------
+/// description : solutions for codewars.com
+/// author      : solweo
+/// -----------------------------------------------------
+#[allow(dead_code)]
+mod death_by_coffee {
+    fn coffee_limits(y: u32, m: u32, d: u32) -> (u32, u32) {
+        const CAFE: u64 = 0xCAFE;
+        const DECAF: u64 = 0xDECAF;
+
+        let health_number: u64 = format!("{:04}{:02}{:02}", y, m, d).parse().unwrap();
+
+        let find_limit = |increment| -> u32 {
+            (1..=5000)
+                .find(|&i| {
+                    let total = health_number + (i as u64 * increment);
+                    format!("{:X}", total).contains("DEAD")
+                })
+                .unwrap_or(0)
+        };
+
+        (find_limit(CAFE), find_limit(DECAF))
+    }
+    
+    fn dotest(y: u32, m: u32, d: u32, expected: (u32, u32)) {
+        let actual = coffee_limits(y, m, d);
+        assert!(actual == expected, "With y = {y}, m = {m}, d = {d}\nExpected {expected:?} but got {actual:?}")
+    }
+
+    #[test]
+    fn ex_john() {
+        dotest(1950, 1, 19, (2645, 1162));
+    }
+
+    #[test]
+    fn ex_susan() {
+        dotest(1965, 12, 11, (111, 0));
+    }
+
+    #[test]
+    fn ex_elizabeth() {
+        dotest(1964, 11, 28, (0, 11));
+    }
+    
+    #[test]
+    fn ex_peter() {
+        dotest(1965, 9, 4, (0, 0));
+    }
+}
