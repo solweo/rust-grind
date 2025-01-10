@@ -289,7 +289,7 @@ mod molecule_to_atoms {
                 }
                 ')' | ']' | '}' => {
                     chars.next(); // Consume closing bracket
-                    if bracket_stack.pop().map_or(false, |open| !is_matching_bracket(open, c)) {
+                    if bracket_stack.pop().is_some_and(|open| !is_matching_bracket(open, c)) {
                         return Err(ParseError::Mismatch);
                     }
                     break;

@@ -12,7 +12,7 @@ mod closed_brackets_string {
         s.chars().try_fold((0usize, 0usize), |(l, u), c| Some((
             if c == '(' { l + 1 } else { l.saturating_sub(1) },
             if c != ')' { u + 1 } else { u.checked_sub(1)? },
-        ))).map_or(false, |(l, _)| l == 0)
+        ))).is_some_and(|(l, _)| l == 0)
     }
 
     #[test]

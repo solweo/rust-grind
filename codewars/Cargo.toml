@@ -15,6 +15,7 @@ authors = ["Adrian Alekseev", "solweo"]
 itertools.workspace = true
 thiserror.workspace = true
 chrono.workspace = true
+rand.workspace = true
 
 [features]
 default = []
