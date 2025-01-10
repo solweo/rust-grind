@@ -16,6 +16,8 @@ itertools.workspace = true
 thiserror.workspace = true
 chrono.workspace = true
 rand.workspace = true
+lazy_static.workspace = true
+regex.workspace = true
 
 [features]
 default = []
