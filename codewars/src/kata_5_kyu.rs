@@ -401,8 +401,6 @@ mod url_shortener {
         db: DB
     }
 
-    /// Look for more of my solutions on github
-    /// https://github.com/solweo/rust-grind
     impl UrlShortener {
         pub fn new() -> Self {
             Self {
@@ -419,7 +417,7 @@ mod url_shortener {
 
         pub fn redirect(&self, short_url: &str) -> String {
             if let Some(stripped) = short_url.strip_prefix(format!("{DOMAIN_NAME}/").as_str()) {
-                if let Some(long_url) = self.db.get_left(stripped) {
+                if let Some(long_url) = self.db.get_long(stripped) {
                     return long_url.to_string();
                 }
             }
@@ -432,8 +430,8 @@ mod url_shortener {
 
     /// Naive BiMap implementation for O(1)-ish speed 
     struct DB {
-        db: HashMap<Rc<str>, Rc<str>>,
-        rev_db: HashMap<Rc<str>, Rc<str>>,
+        long_to_short: HashMap<Rc<str>, Rc<str>>,
+        short_to_long: HashMap<Rc<str>, Rc<str>>,
         /// For some fancy reason, you have to use alphabetical encoding fudge
         pub next_id: Box<dyn FnMut() -> Rc<str>>,
     }
@@ -441,8 +439,8 @@ mod url_shortener {
     impl DB {
         pub fn new() -> Self {
             Self {
-                db: HashMap::new(),
-                rev_db: HashMap::new(),
+                long_to_short: HashMap::new(),
+                short_to_long: HashMap::new(),
                 next_id: {
                     let mut hash_gen = std::iter::successors(Some((1, 0)), |&(len, counter)| {
                         if len > 4 {
@@ -476,18 +474,26 @@ mod url_shortener {
 
         pub fn entry_or_insert(&mut self, key: &str) -> ShortUrl {
             let key: Rc<str> = Rc::from(key);
-            let short_url = self.db.entry(Rc::clone(&key)).or_insert_with(|| (self.next_id)());
-            self.rev_db.entry(short_url.clone()).or_insert(key);
+            let short_url = self.long_to_short
+                .entry(Rc::clone(&key))
+                .or_insert_with(|| (self.next_id)());
+            self.short_to_long
+                .entry(short_url.clone())
+                .or_insert(key);
             short_url
 
         }
 
-        pub fn get_right(&self, key: LongUrl) -> Option<ShortUrl> {
-            self.db.get(&Rc::from(key)).map(|rc_str| &**rc_str)
+        pub fn get_short(&self, key: LongUrl) -> Option<ShortUrl> {
+            self.long_to_short
+                .get(&Rc::from(key))
+                .map(|rc_str| &**rc_str)
         }
 
-        pub fn get_left(&self, key: ShortUrl) -> Option<LongUrl> {
-            self.rev_db.get(&Rc::from(key)).map(|rc_str| &**rc_str)
+        pub fn get_long(&self, key: ShortUrl) -> Option<LongUrl> {
+            self.short_to_long
+                .get(&Rc::from(key))
+                .map(|rc_str| &**rc_str)
         }
     }
 
